@@ -17,5 +17,5 @@ class User extends Model
                             'password', 'document_number'];
 
     // поля которые не надо открыто показывать при отправке User в JSON формате
-    protected $hidden = ['password', 'api_token'];
+    protected $hidden = ['password', 'api_token', 'created_at', 'updated_at', 'id'];
 }

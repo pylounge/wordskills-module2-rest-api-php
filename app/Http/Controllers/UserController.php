@@ -107,6 +107,25 @@ class UserController extends Controller
 
         return $token;
     }
+
+    public function user(Request $request)
+    {
+        $token = $request->bearerToken();
+        $user = User::where('api_token', $token)->first();
+        if ($user === null)
+        {
+            $errorResponse = [
+                "error" =>
+                        ["code" => 401,
+                        "message" => "Unauthorized"
+                        ]
+                    ];
+
+            return response()->json($errorResponse, 401);
+        }
+
+        return response()->json($user->toArray(), 200);;
+    }
 }
 
 
