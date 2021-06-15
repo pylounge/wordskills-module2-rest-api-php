@@ -42,6 +42,71 @@ class UserController extends Controller
         $user = User::create($request->all());
         return response()->json($user, 204);
     }
+
+    public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'phone' => ['required', 'string'],
+            'password' => ['required', 'string'],
+        ]);
+
+          if ($validator->fails())
+          {
+            $errors = [];
+
+            foreach ( json_decode($validator->errors(), true) as $key => $value)
+            {
+                $errors[$key] = $value;
+
+            }
+            $errorResponse = [
+                "error" =>
+                        ["code" => 422,
+                        "message" => "Validation error",
+                        "errors" => $errors
+                        ]
+                    ];
+
+            return response()->json($errorResponse, 422);
+          }
+
+        $user = User::where('phone', $request->get('phone'))->first();
+        if ($user === null or $user->password !== $request->get('password'))
+        {
+            $errorResponse = [
+                "error" =>
+                        ["code" => 401,
+                        "message" => "Unauthorized",
+                        "errors" => [
+                            "phone" => ["phone or password incorrect"]
+                            ]
+                        ]
+                    ];
+            return response()->json($errorResponse, 401);
+        }
+        else
+        {
+            $data = [
+                "data" => [
+                    "token" => $this->getToken($user)
+                ]
+            ];
+            return response()->json($data, 200);
+        }
+
+    }
+
+    protected function getToken($user)
+    {
+        // генерируем токен
+        $token = md5($user->phone . $user->password . time()); // str_random(60);
+
+        // заносим токен в базу данных (для этого пользователя)
+        $user->api_token = $token;
+        $user->save();
+
+        return $token;
+    }
 }
 
 
