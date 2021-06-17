@@ -71,10 +71,32 @@ echo '<pre>';
 echo ($result);
 */
 
-
+/*
 $params = array('query' => 'zAn');
 
 $curl = curl_init('http://localhost/rest-api-ll/public/api/airport?' . http_build_query($params));
+curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+    'Content-Type: application/json')
+ );
+
+
+$result = curl_exec($curl);
+curl_close($curl);
+echo '<pre>';
+echo ($result);
+*/
+
+
+
+$params = array('from' => 'SVO',
+                'to' => 'KZN',
+                'date1' => '2020-10-01',
+                'date2' => '2020-10-13',
+                'passengers' => '2');
+
+$curl = curl_init('http://localhost/rest-api-ll/public/api/flight?' . http_build_query($params));
 curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($curl, CURLOPT_HTTPHEADER, array(

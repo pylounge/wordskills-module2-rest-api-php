@@ -17,6 +17,12 @@ class Airport extends Model
 
      // поля которые не надо открыто показывать при отправке User в JSON формате
      protected $hidden = ['created_at', 'updated_at', 'id'];
+
+     // связь 1 ко многим
+     public function flights()
+    {
+        return $this->hasMany('Flight');
+    }
 }
 
 
