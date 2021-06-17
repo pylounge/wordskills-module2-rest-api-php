@@ -47,6 +47,7 @@ echo ($result);
 
 */
 
+/*
 $data = [
     "phone" => "89001238833",
     "password" => "password",
@@ -61,6 +62,23 @@ curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($curl, CURLOPT_HTTPHEADER, array(
     'Content-Type: application/json',
     'Authorization: Bearer 71a188119a445974f921a80b17d717f22')
+ );
+
+
+$result = curl_exec($curl);
+curl_close($curl);
+echo '<pre>';
+echo ($result);
+*/
+
+
+$params = array('query' => 'zAn');
+
+$curl = curl_init('http://localhost/rest-api-ll/public/api/airport?' . http_build_query($params));
+curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+    'Content-Type: application/json')
  );
 
 
