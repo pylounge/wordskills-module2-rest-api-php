@@ -78,11 +78,16 @@ class FlightController extends Controller
 
         echo $from . $to . $date1 . $date2 . $passengers;
 
-       // рейсы у которых from_id (iata) = from и to_id (iata) = to
-       $flisht_from_to = DB::table('flights')
-       ->join('airports', 'flights.from_id', '=', 'airports.id')
-       ->select('flights.*', 'airports.*')
-       ->first();
-       print_r($flisht_from_to);
+       //рейсы у которых from_id (iata) = from и to_id (iata) = to
+       $flights_from = DB::table('flights as f')
+       ->join('airports as a', 'f.from_id', '=', 'a.id')
+       ->join('airports as aa', 'f.to_id', '=', 'aa.id')
+       ->select(['f.id as id', 'f.flight_code as code',
+                'a.name as from_airport', 'a.city as from_city', 'a.iata as from_iata',
+                'f.time_from', 'f.cost',
+                'aa.name as to_airport', 'aa.city as to_city', 'aa.iata as to_iata', 'f.time_to'])->get();
+
+        // добавить дату и количество свободных мест
+       print_r($flights_from[0]->code);
     }
 }
