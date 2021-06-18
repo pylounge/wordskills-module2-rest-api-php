@@ -24,4 +24,9 @@ class Flight extends Model
     {
         return $this->belongsTo('Airport');
     }
+
+    public function booking()
+    {
+        return $this->belongsTo('Booking');
+    }
 }
