@@ -61,6 +61,10 @@ class FlightController extends Controller
                 array_push($errorResponse['error']['errors'], ['date2' => 'Поддерживаемый формат: YYYY-MM-DD']);
             }
         }
+        else
+        {
+            $date2 = null;
+        }
 
         if ($request->has('passengers') && preg_match("/[1-8]/i", $request['passengers']) === 1)
         {
@@ -76,18 +80,63 @@ class FlightController extends Controller
             return response()->json($errorResponse, 422);
         }
 
-        echo $from . $to . $date1 . $date2 . $passengers;
-
-       //рейсы у которых from_id (iata) = from и to_id (iata) = to
        $flights_from = DB::table('flights as f')
-       ->join('airports as a', 'f.from_id', '=', 'a.id')
-       ->join('airports as aa', 'f.to_id', '=', 'aa.id')
-       ->select(['f.id as id', 'f.flight_code as code',
-                'a.name as from_airport', 'a.city as from_city', 'a.iata as from_iata',
-                'f.time_from', 'f.cost',
-                'aa.name as to_airport', 'aa.city as to_city', 'aa.iata as to_iata', 'f.time_to'])->get();
+                        ->join('airports as a', 'f.from_id', '=', 'a.id')
+                        ->join('airports as aa', 'f.to_id', '=', 'aa.id')
+                        ->where('a.iata', '=', "{$from}")
+                        ->where('aa.iata', '=', "{$to}")
+                        ->select(['f.id as id', 'f.flight_code as code',
+                                  'a.name as from_airport', 'a.city as from_city', 'a.iata as from_iata',
+                                  'f.time_from', 'f.cost',
+                                  'aa.name as to_airport', 'aa.city as to_city', 'aa.iata as to_iata', 'f.time_to'])
+                        ->get();
 
-        // добавить дату и количество свободных мест
-       print_r($flights_from[0]->code);
+
+        foreach ($flights_from as $flight)
+        {
+            array_push($data['data']['flights_to'],
+                      ['flight_id' => $flight->id, 'flight_code' => $flight->code,
+                      'from' => [
+                          'city' => $flight->from_city, 'airport' => $flight->from_airport,
+                          'iata' => $flight->from_iata, 'date' => $date1, 'time' => $flight->time_from
+                        ],
+                      'to' => [
+                          'city' => $flight->to_city, 'airport' => $flight->to_airport,
+                          'iata' => $flight->to_iata, 'date' => $date1, 'time' => $flight->time_to
+                        ],
+                      'cost' => $flight->cost, 'availability' => FLIGHT::MAX_NUMBER_SEATS ]);
+        }
+
+        if ($date2 !== null)
+        {
+            $flights_to = DB::table('flights as f')
+                            ->join('airports as a', 'f.from_id', '=', 'a.id')
+                            ->join('airports as aa', 'f.to_id', '=', 'aa.id')
+                            ->where('a.iata', '=', "{$to}")
+                            ->where('aa.iata', '=', "{$from}")
+                            ->select(['f.id as id', 'f.flight_code as code',
+                                      'a.name as from_airport', 'a.city as from_city', 'a.iata as from_iata',
+                                      'f.time_from', 'f.cost',
+                                      'aa.name as to_airport', 'aa.city as to_city', 'aa.iata as to_iata', 'f.time_to'])
+                            ->get();
+
+            foreach ($flights_to as $flight)
+            {
+                array_push($data['data']['flights_back'],
+                           ['flight_id' => $flight->id, 'flight_code' => $flight->code,
+                           'from' => [
+                               'city' => $flight->from_city, 'airport' => $flight->from_airport,
+                               'iata' => $flight->from_iata, 'date' => $date2, 'time' => $flight->time_from
+                            ],
+                           'to' => [
+                               'city' => $flight->to_city, 'airport' => $flight->to_airport,
+                               'iata' => $flight->to_iata, 'date' => $date2, 'time' => $flight->time_to
+                            ],
+                           'cost' => $flight->cost, 'availability' => FLIGHT::MAX_NUMBER_SEATS ]);
+            }
+        }
+        return response()->json($data, 200);
+
+        // TODO проверка мест на заданные даты
     }
 }
