@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Flight;
 
 class Booking extends Model
 {
@@ -20,7 +21,7 @@ class Booking extends Model
 
     public function flight_f()
    {
-       return $this->hasOne('Flight');
+       return $this->hasOne(Flight::class);
    }
 
    public function flight_b()

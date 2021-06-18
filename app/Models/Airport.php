@@ -21,7 +21,7 @@ class Airport extends Model
      // связь 1 ко многим
      public function flights()
     {
-        return $this->hasMany('Flight');
+        return $this->hasMany(Flight::class);
     }
 }
 

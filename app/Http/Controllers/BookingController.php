@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Models\Booking;
 use App\Models\Flight;
+use App\Models\Airport;
+use App\Models\Passanger;
 use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
@@ -51,6 +53,14 @@ class BookingController extends Controller
                                       'date_from' => $request['flight_from']['date'],
                                       'date_back' => $request['flight_back']['date'],
                                       'code' => $code]);
+
+                                      foreach($request['passengers'] as $passanger)
+                                      {
+                                        Passanger::create(['booking_id'=>$booking->id, 'first_name'=>$passanger['first_name'],
+                                        'last_name'=>$passanger['last_name'], 'birth_date'=>$passanger['birth_date'],
+                                        'document_number'=>$passanger['document_number'],null, null]);
+                                      }
+
 
          return response()->json(['data' => ['code' => $code]], 201);
     }
@@ -109,7 +119,6 @@ class BookingController extends Controller
 
             $cost += $flight->cost;
         }
-
 
     }
 }

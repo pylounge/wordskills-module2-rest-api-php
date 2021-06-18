@@ -22,7 +22,7 @@ class Flight extends Model
     // т.к. один аэропорт может содержать множество рейсов
     public function airport()
     {
-        return $this->belongsTo('Airport');
+        return $this->belongsTo(Airport::class, 'airports.id');
     }
 
     public function booking()

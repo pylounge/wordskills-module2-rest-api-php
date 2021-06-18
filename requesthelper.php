@@ -111,7 +111,7 @@ echo ($result);
 */
 
 
-/*
+
 $data = [
     'flight_from' => ['id' => '1', 'date' => '2020-09-20'],
     'flight_back' => ['id' => '2', 'date' => '2020-09-30'],
@@ -145,8 +145,9 @@ $result = curl_exec($curl);
 curl_close($curl);
 echo '<pre>';
 echo ($result);
-*/
 
+
+/*
 $code = "TESTA";
 $curl = curl_init('http://localhost/rest-api-ll/public/api/booking/' . $code);
 curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
@@ -160,3 +161,4 @@ $result = curl_exec($curl);
 curl_close($curl);
 echo '<pre>';
 echo ($result);
+*/
