@@ -15,6 +15,7 @@ class Booking extends Model
     // необходимы для создания записи в базу через ModelName::create()
     protected $fillable = ['flight_from', 'flight_back', 'date_from', 'date_back', 'code'];
 
+    // protected $hidden = ['created_at', 'updated_at', 'id', 'flight_from', 'flight_back', 'date_from', 'date_back'];
     protected $hidden = ['created_at', 'updated_at', 'id', 'flight_from', 'flight_back', 'date_from', 'date_back'];
 
     public function flight_f()
@@ -26,4 +27,9 @@ class Booking extends Model
    {
        return $this->hasOne('Flight');
    }
+
+   public function passanger()
+    {
+        return $this->belongsTo('Passanger');
+    }
 }

@@ -21,3 +21,5 @@ Route::get('airport', [AirportController::class, 'airport'])->name('airport');
 Route::get('flight', [FlightController::class, 'flight'])->name('flight');
 
 Route::post('booking', [BookingController::class, 'booking'])->name('booking');
+
+Route::get('booking/{code}', [BookingController::class, 'getBookingInfo'])->name('booking');

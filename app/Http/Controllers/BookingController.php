@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Validator;
 
 use Illuminate\Support\Str;
 use App\Models\Booking;
+use App\Models\Flight;
+use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
@@ -56,5 +58,58 @@ class BookingController extends Controller
     protected function getCode()
     {
         return Str::random(5);
+    }
+
+    public function getBookingInfo(Request $request, $code)
+    {
+        $bookingRecord  =  DB::table('bookings')->where('code', '=', $code)->first();
+
+
+        $flight_from = DB::table('flights as f')->where('f.id', '=', $bookingRecord->flight_from)
+        ->join('airports as a', 'f.from_id', '=', 'a.id')
+        ->join('airports as aa', 'f.to_id', '=', 'aa.id')
+        ->select(['f.id as id', 'f.flight_code as code',
+                                  'a.name as from_airport', 'a.city as from_city', 'a.iata as from_iata',
+                                  'f.time_from', 'f.cost',
+                                  'aa.name as to_airport', 'aa.city as to_city', 'aa.iata as to_iata', 'f.time_to'])
+        ->get();
+
+        $flight_back = DB::table('flights as f')->where('f.id', '=', $bookingRecord->flight_back)
+        ->join('airports as a', 'f.from_id', '=', 'a.id')
+        ->join('airports as aa', 'f.to_id', '=', 'aa.id')
+        ->select(['f.id as id', 'f.flight_code as code',
+                                  'a.name as from_airport', 'a.city as from_city', 'a.iata as from_iata',
+                                  'f.time_from', 'f.cost',
+                                  'aa.name as to_airport', 'aa.city as to_city', 'aa.iata as to_iata', 'f.time_to'])
+        ->get();
+
+        $data = [
+            'data' => [
+                'code' => $code,
+                'flights' => [],
+                'passangers' => [],
+                'cost' => '0'
+                ]
+            ];
+
+         $cost = 0;
+        foreach ($flight_from as $flight)
+        {
+            array_push($data['data']['flights'],
+                      ['flight_id' => $flight->id, 'flight_code' => $flight->code,
+                      'from' => [
+                          'city' => $flight->from_city, 'airport' => $flight->from_airport,
+                          'iata' => $flight->from_iata, 'date' => $bookingRecord->date_from, 'time' => $flight->time_from
+                        ],
+                      'to' => [
+                          'city' => $flight->to_city, 'airport' => $flight->to_airport,
+                          'iata' => $flight->to_iata, 'date' => $bookingRecord->date_back, 'time' => $flight->time_to
+                        ],
+                      'cost' => $flight->cost, 'availability' => Flight::MAX_NUMBER_SEATS ]);
+
+            $cost += $flight->cost;
+        }
+
+
     }
 }
