@@ -31,6 +31,6 @@ class Booking extends Model
 
    public function passanger()
     {
-        return $this->belongsTo('Passanger');
+        return $this->belongsTo(Passanger::class);
     }
 }

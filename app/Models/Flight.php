@@ -20,13 +20,18 @@ class Flight extends Model
 
     // задаём связь 1 ко многим с таблицей аэропорты
     // т.к. один аэропорт может содержать множество рейсов
-    public function airport()
+    public function airport_from()
     {
-        return $this->belongsTo(Airport::class, 'airports.id');
+        return $this->belongsTo(Airport::class, 'from_id', 'id');
+    }
+
+    public function airport_to()
+    {
+        return $this->belongsTo(Airport::class, 'to_id', 'id');
     }
 
     public function booking()
     {
-        return $this->belongsTo('Booking');
+        return $this->belongsTo(Booking::class);
     }
 }

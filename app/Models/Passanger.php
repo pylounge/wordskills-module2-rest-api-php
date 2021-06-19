@@ -16,11 +16,11 @@ class Passanger extends Model
                             'place_from', 'place_back'];
 
      // поля которые не надо открыто показывать при отправке User в JSON формате
-     protected $hidden = ['created_at', 'updated_at', 'id'];
+     protected $hidden = ['created_at', 'updated_at', 'booking_id'];
 
      // связь 1 ко многим
      public function booking()
     {
-        return $this->hasMany('Booking');
+        return $this->hasMany(Booking::class, 'booking_id', 'id');
     }
 }

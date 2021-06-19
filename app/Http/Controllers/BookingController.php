@@ -11,6 +11,7 @@ use App\Models\Flight;
 use App\Models\Airport;
 use App\Models\Passanger;
 use Illuminate\Support\Facades\DB;
+use Mockery\Generator\StringManipulation\Pass\Pass;
 
 class BookingController extends Controller
 {
@@ -113,12 +114,39 @@ class BookingController extends Controller
                         ],
                       'to' => [
                           'city' => $flight->to_city, 'airport' => $flight->to_airport,
+                          'iata' => $flight->to_iata, 'date' => $bookingRecord->date_from, 'time' => $flight->time_to
+                        ],
+                      'cost' => $flight->cost, 'availability' => Flight::MAX_NUMBER_SEATS ]);
+
+            $cost += $flight->cost;
+        }
+
+        foreach ($flight_back as $flight)
+        {
+            array_push($data['data']['flights'],
+                      ['flight_id' => $flight->id, 'flight_code' => $flight->code,
+                      'from' => [
+                          'city' => $flight->from_city, 'airport' => $flight->from_airport,
+                          'iata' => $flight->from_iata, 'date' => $bookingRecord->date_back, 'time' => $flight->time_from
+                        ],
+                      'to' => [
+                          'city' => $flight->to_city, 'airport' => $flight->to_airport,
                           'iata' => $flight->to_iata, 'date' => $bookingRecord->date_back, 'time' => $flight->time_to
                         ],
                       'cost' => $flight->cost, 'availability' => Flight::MAX_NUMBER_SEATS ]);
 
             $cost += $flight->cost;
         }
+
+        $data['data']['cost'] = $cost;
+
+        $passangers = Passanger::where('booking_id', $bookingRecord->id)->get();
+        foreach($passangers as $passanger)
+        {
+            array_push($data['data']['passangers'], $passanger->toArray());
+        }
+
+        print_r($data);
 
     }
 }
