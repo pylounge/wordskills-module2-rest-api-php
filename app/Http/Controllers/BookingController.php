@@ -187,4 +187,109 @@ class BookingController extends Controller
 
             return response()->json($data, 200);
     }
+
+    public function choiceSeat(Request $request, $code)
+    {
+        $data = [ 'data' => [] ];
+
+        $validationError = ['error' => ['code' => 422, 'message' => 'Validation error', 'errors' => [] ]];
+        $forbidden = [ 'error' => ['code' => 403, 'message' => 'Passenger does not apply to booking'] ];
+        $seatIsOccupied = [ 'error' => ['code' => 422, 'message' => 'Seat is occupied'] ];
+
+        if($request->has("passenger"))
+        {
+            $passanger = $request['passenger'];
+        }
+        else
+        {
+            array_push($validationError['error']['errors'], ['passenger' => 'Обязательное поле']);
+        }
+
+        if($request->has("seat"))
+        {
+            $seat = $request['seat'];
+        }
+        else
+        {
+            array_push($validationError['error']['errors'], ['seat' => 'Обязательное поле']);
+        }
+
+        if($request->has("type"))
+        {
+            if ($request['type'] === 'from' || $request['type'] === 'back')
+            {
+                $type = $request['type'];
+            }
+            else
+            {
+                array_push($validationError['error']['errors'], ['type' => 'Допустимые значения: from/back']);
+            }
+        }
+        else
+        {
+            array_push($validationError['error']['errors'], ['type' => 'Обязательное поле']);
+        }
+
+        if (!empty($validationError['error']['errors']))
+        {
+            return response()->json($validationError, 422);
+        }
+
+
+        $bookingRecord = Booking::where('code', $code)->first();
+
+        $searchedPassager = Passanger::where('booking_id', $bookingRecord->id)->first();
+
+
+        if ($searchedPassager === null || $searchedPassager->id != $passanger)
+        {
+            return response()->json($forbidden, 403);
+        }
+
+        $occupiedSeatsFrom = Passanger::where('booking_id', $bookingRecord->id)->get('place_from')->toArray();
+        $occupiedSeatsBack = Passanger::where('booking_id', $bookingRecord->id)->get('place_back')->toArray();
+
+        $isOccupied = false;
+
+        if ($type === 'from')
+        {
+            foreach($occupiedSeatsFrom as $item)
+            {
+                if ($item['place_from'] === $seat)
+                {
+                    $isOccupied = true;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            foreach($occupiedSeatsBack as $item)
+            {
+                if ($item['place_back'] === $seat)
+                {
+                    $isOccupied = true;
+                    break;
+                }
+            }
+        }
+
+        if ($isOccupied)
+        {
+            return response()->json($seatIsOccupied, 422);
+        }
+
+        if ($type === 'from')
+        {
+            $searchedPassager->place_from = $seat;
+        }
+        else
+        {
+            $searchedPassager->place_back = $seat;
+        }
+        $searchedPassager->save();
+
+        return response()->json( [ 'data' => $searchedPassager->toArray() ], 200);
+
+    }
 }
