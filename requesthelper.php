@@ -149,7 +149,7 @@ echo '<pre>';
 echo ($result);
 */
 
-
+/*
 $code = "TESTA";
 $curl = curl_init('http://localhost/rest-api-ll/public/api/booking/' . $code);
 curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
@@ -163,4 +163,19 @@ $result = curl_exec($curl);
 curl_close($curl);
 echo '<pre>';
 echo ($result);
+*/
 
+
+$code = "TESTA";
+$curl = curl_init('http://localhost/rest-api-ll/public/api/booking/' . $code . '/seat');
+curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+    'Content-Type: application/json')
+ );
+
+
+$result = curl_exec($curl);
+curl_close($curl);
+echo '<pre>';
+echo ($result);

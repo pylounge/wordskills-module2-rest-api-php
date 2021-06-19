@@ -73,6 +73,15 @@ class BookingController extends Controller
 
     public function getBookingInfo(Request $request, $code)
     {
+        /* Полностью через ORM
+
+            $flight_from = Flight::where('id', $bookingRecord->flight_from)->first();
+            $airport_from_flight = $flight_from->airport_from;
+            print_r($flight_from->toArray());
+            print_r($airport_from_flight->toArray());
+
+        */
+
         $bookingRecord  =  DB::table('bookings')->where('code', '=', $code)->first();
 
 
@@ -146,7 +155,36 @@ class BookingController extends Controller
             array_push($data['data']['passangers'], $passanger->toArray());
         }
 
-        print_r($data);
+        return response()->json($data, 200);
+    }
 
+    public function getОccupiedSeat(Request $request, $code)
+    {
+        $data = [
+            'data' => [
+                'occupied_from' => [],
+                'occupied_back' => []
+                ]
+            ];
+
+            $bookingRecord = Booking::where('code', $code)->first();
+            $passangers = Passanger::where('booking_id', $bookingRecord->id)->get();
+
+            foreach($passangers as $passanger)
+            {
+                if ($passanger->place_from !== null)
+                {
+                    array_push($data['data']['occupied_from'], ['passenger_id' => $passanger->id,
+                                                                'place' =>  $passanger->place_from]);
+                }
+
+                if ($passanger->place_back !== null)
+                {
+                    array_push($data['data']['occupied_back'], ['passenger_id' => $passanger->id,
+                                                                'place' =>  $passanger->place_back]);
+                }
+            }
+
+            return response()->json($data, 200);
     }
 }
