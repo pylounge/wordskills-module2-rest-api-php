@@ -21,6 +21,6 @@ class Passanger extends Model
      // связь 1 ко многим
      public function booking()
     {
-        return $this->hasMany(Booking::class, 'booking_id', 'id');
+        return $this->hasMany(Booking::class);
     }
 }

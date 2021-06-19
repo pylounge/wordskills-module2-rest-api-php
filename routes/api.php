@@ -27,3 +27,5 @@ Route::get('booking/{code}', [BookingController::class, 'getBookingInfo'])->name
 Route::get('booking/{code}/seat', [BookingController::class, 'getОccupiedSeat'])->name('booking');
 
 Route::patch('booking/{code}/seat', [BookingController::class, 'choiceSeat'])->name('booking');
+
+Route::get('user/booking', [BookingController::class, 'getUserBookingInfo'])->name('get-user-booking-info');

@@ -21,16 +21,16 @@ class Booking extends Model
 
     public function flight_f()
    {
-       return $this->hasOne(Flight::class);
+       return $this->hasOne(Flight::class, 'id', 'flight_from');
    }
 
    public function flight_b()
    {
-       return $this->hasOne('Flight');
+       return $this->hasOne(Flight::class, 'id',  'flight_back');
    }
 
    public function passanger()
     {
-        return $this->belongsTo(Passanger::class);
+        return $this->belongsTo(Passanger::class, 'id', 'booking_id');
     }
 }

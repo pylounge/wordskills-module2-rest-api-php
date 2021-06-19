@@ -10,6 +10,7 @@ use App\Models\Booking;
 use App\Models\Flight;
 use App\Models\Airport;
 use App\Models\Passanger;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Mockery\Generator\StringManipulation\Pass\Pass;
 
@@ -290,6 +291,49 @@ class BookingController extends Controller
         $searchedPassager->save();
 
         return response()->json( [ 'data' => $searchedPassager->toArray() ], 200);
+    }
 
+    public function getUserBookingInfo(Request $request)
+    {
+
+        $data = [
+            'data' => [
+                    'items' => [
+                        'code' => '',
+                        'cost' => '',
+                        'flights' => [],
+                        'passangers' => []
+                    ]
+                ]
+            ];
+
+        $token = $request->bearerToken();
+        $user = User::where('api_token', $token)->first();
+        if ($user === null)
+        {
+            $errorResponse = [
+                "error" =>
+                        ["code" => 401,
+                        "message" => "Unauthorized"
+                        ]
+                    ];
+
+            return response()->json($errorResponse, 401);
+        }
+
+        $passangerRecord = Passanger::where('document_number', $user->document_number)->first();
+        $bookingRecord = Booking::find($passangerRecord->booking_id);
+
+        $data['data']['items']['code'] = $bookingRecord->code;
+
+        $flight_from = $bookingRecord->flight_f;
+        $flight_back = $bookingRecord->flight_b;
+
+        $airport_flight_from = $flight_from->airport_from->toArray();
+        $airport_flight_back = $flight_from->airport_to->toArray();
+
+        $bookingPassangers = $bookingRecord->passanger->toArray();
+
+        print_r($bookingRecord->toArray());
     }
 }
