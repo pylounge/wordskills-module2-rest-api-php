@@ -34,4 +34,29 @@ class Flight extends Model
     {
         return $this->belongsTo(Booking::class);
     }
+
+    public function countAvaibleSeat($flightFromDate, $from=true)
+    {
+        //print_r([$flightFromId, $flightFromDate, $flightBackId, $flightBackDate]);
+
+        if ($from === true)
+        {
+            $bookedFromFlights = Booking::where('flight_from', $this->id)
+            ->where('date_from', $flightFromDate)->get();
+        }
+        else
+        {
+            $bookedFromFlights = Booking::where('flight_back', $this->id)
+            ->where('date_back', $flightFromDate)->get();
+        }
+
+        $avaibleSeat = 0;
+        foreach ($bookedFromFlights as $bookedFlight) {
+            $bookedRecords = Passanger::where('booking_id', $bookedFlight->id)->count();
+            $avaibleSeat += $bookedRecords;
+        }
+
+        return Flight::MAX_NUMBER_SEATS - $avaibleSeat;
+    }
+
 }

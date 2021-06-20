@@ -8,7 +8,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AirportController;
 use App\Http\Controllers\FlightController;
 use App\Http\Controllers\BookingController;
-use App\Models\User;
 
 Route::post('register', [UserController::class, 'register'])->name('register');
 

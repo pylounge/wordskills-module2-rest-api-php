@@ -33,4 +33,9 @@ class Booking extends Model
     {
         return $this->belongsTo(Passanger::class, 'id', 'booking_id');
     }
+
+    static function chackPossibilityBooking($avaiableSeats, $countPassangers)
+    {
+        return $avaiableSeats - $countPassangers >= 0;
+    }
 }

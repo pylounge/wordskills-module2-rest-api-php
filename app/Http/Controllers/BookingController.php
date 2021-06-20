@@ -40,12 +40,22 @@ class BookingController extends Controller
                         "errors" => $errors
                     ]
                 ];
-
                 return response()->json($errorResponse, 422);
             }
         }
 
-        // TODO проверка на свободные места
+        $flight_from = Flight::find($request['flight_from']['id']);
+        $flight_back = Flight::find($request['flight_back']['id']);
+
+        $countAvaibleSeatFrom =   $flight_from->countAvaibleSeat($request['flight_from']['date']);
+        $countAvaibleSeatBack =   $flight_back->countAvaibleSeat($request['flight_back']['date'], false);
+
+        if ((Booking::chackPossibilityBooking($countAvaibleSeatFrom, count($request['passengers'])) !== true) ||
+            (Booking::chackPossibilityBooking($countAvaibleSeatBack, count($request['passengers'])) !== true)
+        ) {
+            return response()->json(['data' => ['message' => 'Нет свободных мест']], 200);
+        }
+
         $code =  $this->getCode();
         $booking = Booking::create([
             'flight_from' => $request['flight_from']['id'],
@@ -62,8 +72,6 @@ class BookingController extends Controller
                 'document_number' => $passanger['document_number'], null, null
             ]);
         }
-
-
         return response()->json(['data' => ['code' => $code]], 201);
     }
 
@@ -85,7 +93,6 @@ class BookingController extends Controller
 
         $bookingRecord  =  DB::table('bookings')->where('code', '=', $code)->first();
 
-
         $flight_from = DB::table('flights as f')->where('f.id', '=', $bookingRecord->flight_from)
             ->join('airports as a', 'f.from_id', '=', 'a.id')
             ->join('airports as aa', 'f.to_id', '=', 'aa.id')
@@ -94,8 +101,7 @@ class BookingController extends Controller
                 'a.name as from_airport', 'a.city as from_city', 'a.iata as from_iata',
                 'f.time_from', 'f.cost',
                 'aa.name as to_airport', 'aa.city as to_city', 'aa.iata as to_iata', 'f.time_to'
-            ])
-            ->get();
+            ])->get();
 
         $flight_back = DB::table('flights as f')->where('f.id', '=', $bookingRecord->flight_back)
             ->join('airports as a', 'f.from_id', '=', 'a.id')
@@ -105,8 +111,7 @@ class BookingController extends Controller
                 'a.name as from_airport', 'a.city as from_city', 'a.iata as from_iata',
                 'f.time_from', 'f.cost',
                 'aa.name as to_airport', 'aa.city as to_city', 'aa.iata as to_iata', 'f.time_to'
-            ])
-            ->get();
+            ])->get();
 
         $data = [
             'data' => [
@@ -119,6 +124,7 @@ class BookingController extends Controller
 
         $cost = 0;
         foreach ($flight_from as $flight) {
+            $flight_info = Flight::find($flight->id);
             array_push(
                 $data['data']['flights'],
                 [
@@ -131,14 +137,15 @@ class BookingController extends Controller
                         'city' => $flight->to_city, 'airport' => $flight->to_airport,
                         'iata' => $flight->to_iata, 'date' => $bookingRecord->date_from, 'time' => $flight->time_to
                     ],
-                    'cost' => $flight->cost, 'availability' => Flight::MAX_NUMBER_SEATS
+                    'cost' => $flight->cost, 'availability' =>  $flight_info->countAvaibleSeat($bookingRecord->date_from)
                 ]
             );
-
             $cost += $flight->cost;
         }
 
         foreach ($flight_back as $flight) {
+            $flight_info = Flight::find($flight->id);
+
             array_push(
                 $data['data']['flights'],
                 [
@@ -151,10 +158,9 @@ class BookingController extends Controller
                         'city' => $flight->to_city, 'airport' => $flight->to_airport,
                         'iata' => $flight->to_iata, 'date' => $bookingRecord->date_back, 'time' => $flight->time_to
                     ],
-                    'cost' => $flight->cost, 'availability' => Flight::MAX_NUMBER_SEATS
+                    'cost' => $flight->cost, 'availability' =>  $flight_info->countAvaibleSeat($bookingRecord->date_back)
                 ]
             );
-
             $cost += $flight->cost;
         }
 
@@ -164,7 +170,6 @@ class BookingController extends Controller
         foreach ($passangers as $passanger) {
             array_push($data['data']['passangers'], $passanger->toArray());
         }
-
         return response()->json($data, 200);
     }
 
@@ -195,14 +200,11 @@ class BookingController extends Controller
                 ]);
             }
         }
-
         return response()->json($data, 200);
     }
 
     public function choiceSeat(Request $request, $code)
     {
-        $data = ['data' => []];
-
         $validationError = ['error' => ['code' => 422, 'message' => 'Validation error', 'errors' => []]];
         $forbidden = ['error' => ['code' => 403, 'message' => 'Passenger does not apply to booking']];
         $seatIsOccupied = ['error' => ['code' => 422, 'message' => 'Seat is occupied']];
@@ -233,11 +235,8 @@ class BookingController extends Controller
             return response()->json($validationError, 422);
         }
 
-
         $bookingRecord = Booking::where('code', $code)->first();
-
         $searchedPassager = Passanger::where('booking_id', $bookingRecord->id)->first();
-
 
         if ($searchedPassager === null || $searchedPassager->id != $passanger) {
             return response()->json($forbidden, 403);
@@ -280,7 +279,6 @@ class BookingController extends Controller
 
     public function getUserBookingInfo(Request $request)
     {
-
         $data = [
             'data' => [
                 'items' => [
@@ -302,12 +300,10 @@ class BookingController extends Controller
                     "message" => "Unauthorized"
                 ]
             ];
-
             return response()->json($errorResponse, 401);
         }
 
         $passangerRecord = Passanger::where('document_number', $user->document_number)->first();
-
         $bookingRecord = Booking::find($passangerRecord->booking_id);
 
         $data['data']['items']['code'] = $bookingRecord->code;
@@ -318,15 +314,12 @@ class BookingController extends Controller
         $airport_flight_from = $flight_from->airport_from;
         $airport_flight_back = $flight_from->airport_to;
 
-
         $airport_flight_from_to = $flight_back->airport_from;
         $airport_flight_back_to = $flight_back->airport_to;
-
 
         $bookingPassangers = Passanger::where('booking_id', $bookingRecord->id)->get()->toArray();
 
         $data['data']['items']['cost'] = $flight_from->cost + $flight_back->cost;
-
 
         array_push($data['data']['items']['flights'], [
             'flight_id' => $flight_from->id,
@@ -346,10 +339,8 @@ class BookingController extends Controller
                 'time' => $flight_from->time_to
             ],
             'cost' => $flight_from->cost,
-            'availability' => Flight::MAX_NUMBER_SEATS
+            'availability' => $flight_from->countAvaibleSeat($bookingRecord->date_from)
         ]);
-
-
 
         array_push($data['data']['items']['flights'], [
             'flight_id' => $flight_back->id,
@@ -369,14 +360,12 @@ class BookingController extends Controller
                 'time' => $flight_back->time_to
             ],
             'cost' => $flight_back->cost,
-            'availability' => Flight::MAX_NUMBER_SEATS
+            'availability' => $flight_back->countAvaibleSeat($bookingRecord->date_back, false)
         ]);
 
-        foreach($bookingPassangers as $singlePassanger)
-        {
+        foreach ($bookingPassangers as $singlePassanger) {
             array_push($data['data']['items']['passangers'], $singlePassanger);
         }
-
         return response()->json($data, 200);
     }
 }

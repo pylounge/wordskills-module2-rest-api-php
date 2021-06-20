@@ -94,6 +94,8 @@ class FlightController extends Controller
 
         foreach ($flights_from as $flight)
         {
+            $flight_from = Flight::find($flight->id);
+
             array_push($data['data']['flights_to'],
                       ['flight_id' => $flight->id, 'flight_code' => $flight->code,
                       'from' => [
@@ -104,7 +106,7 @@ class FlightController extends Controller
                           'city' => $flight->to_city, 'airport' => $flight->to_airport,
                           'iata' => $flight->to_iata, 'date' => $date1, 'time' => $flight->time_to
                         ],
-                      'cost' => $flight->cost, 'availability' => FLIGHT::MAX_NUMBER_SEATS ]);
+                      'cost' => $flight->cost, 'availability' =>  $flight_from->countAvaibleSeat($date1) ]);
         }
 
         if ($date2 !== null)
@@ -122,6 +124,8 @@ class FlightController extends Controller
 
             foreach ($flights_to as $flight)
             {
+                $flight_back = Flight::find($flight->id);
+
                 array_push($data['data']['flights_back'],
                            ['flight_id' => $flight->id, 'flight_code' => $flight->code,
                            'from' => [
@@ -132,7 +136,7 @@ class FlightController extends Controller
                                'city' => $flight->to_city, 'airport' => $flight->to_airport,
                                'iata' => $flight->to_iata, 'date' => $date2, 'time' => $flight->time_to
                             ],
-                           'cost' => $flight->cost, 'availability' => FLIGHT::MAX_NUMBER_SEATS ]);
+                           'cost' => $flight->cost, 'availability' => $flight_back->countAvaibleSeat($date2, false)]);
             }
         }
         return response()->json($data, 200);

@@ -130,9 +130,7 @@ $data = [
         ],
     ]
 ];
-*/
 
-/*
 $data_string = json_encode ($data, JSON_UNESCAPED_UNICODE);
 $curl = curl_init('http://localhost/rest-api-ll/public/api/booking');
 curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
@@ -217,8 +215,12 @@ curl_setopt($curl, CURLOPT_HTTPHEADER, array(
     'Authorization: Bearer 71a188119a445974f921a80b17d717f2')
  );
 
-
 $result = curl_exec($curl);
 curl_close($curl);
 echo '<pre>';
 echo ($result);
+
+
+
+
+
