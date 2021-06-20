@@ -26,7 +26,6 @@ class UserController extends Controller
             foreach ( json_decode($validator->errors(), true) as $key => $value)
             {
                 $errors[$key] = $value;
-
             }
             $errorResponse = [
                 "error" =>
@@ -35,7 +34,6 @@ class UserController extends Controller
                         "errors" => $errors
                         ]
                     ];
-
             return response()->json($errorResponse, 422);
           }
 
@@ -66,7 +64,6 @@ class UserController extends Controller
                         "errors" => $errors
                         ]
                     ];
-
             return response()->json($errorResponse, 422);
           }
 
@@ -93,7 +90,6 @@ class UserController extends Controller
             ];
             return response()->json($data, 200);
         }
-
     }
 
     protected function getToken($user)
@@ -120,10 +116,8 @@ class UserController extends Controller
                         "message" => "Unauthorized"
                         ]
                     ];
-
             return response()->json($errorResponse, 401);
         }
-
         return response()->json($user->toArray(), 200);;
     }
 }

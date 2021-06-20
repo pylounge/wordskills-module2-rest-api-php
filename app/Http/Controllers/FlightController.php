@@ -91,7 +91,6 @@ class FlightController extends Controller
                                   'aa.name as to_airport', 'aa.city as to_city', 'aa.iata as to_iata', 'f.time_to'])
                         ->get();
 
-
         foreach ($flights_from as $flight)
         {
             $flight_from = Flight::find($flight->id);
@@ -140,7 +139,5 @@ class FlightController extends Controller
             }
         }
         return response()->json($data, 200);
-
-        // TODO проверка мест на заданные даты
     }
 }
